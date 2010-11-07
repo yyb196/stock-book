@@ -1,0 +1,6 @@
+1.add new stock (000598,600141,600778,600425,600000,000400,600597)
+2.pagenation
+3.search
+4.add comment
+5.delete stock
+

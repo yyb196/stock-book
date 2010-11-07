@@ -1,0 +1,13 @@
+cron:
+- description: daily update job
+  url: /admin/updateStockPrice
+  schedule: every monday,tuesday,wednesday,thursday,friday of month 8:00
+- description: monday morning mailout
+  url: /admin/updateStockPrice
+  schedule: every monday,tuesday,wednesday,thursday,friday of month 8:30
+- description: monday morning mailout
+  url: /admin/updateStockPrice
+  schedule: every monday,tuesday,wednesday,thursday,friday of month 9:00
+- description: monday morning mailout
+  url: /admin/updateStockPrice
+  schedule: every monday,tuesday,wednesday,thursday,friday of month 9:30
