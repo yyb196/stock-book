@@ -10,7 +10,7 @@ import logging#
 
 import myutils#
 from google.appengine.ext import webapp#
-
+from google.appengine.ext import db
 from datetime import date#
 import datetime#
 import stock#
@@ -21,22 +21,31 @@ class UpdateStock(webapp.RequestHandler):
     def get(self):
         h = datetime.datetime.utcnow().hour
         logging.debug("update stock hour is:" + str(h))
-        if h >= 8 and h < 16:
+        if h >= 8 and h < 16:#8+8 16+8
             stocks = stock.getStocks()
             today = date.today()
+            sArr = []
             for one in stocks:
                 if myutils.sameDay(today, one.price_update_date):
                     pass
                 else:
-                    stock_detail_str = myutils.getStockPrice(one.stock_id).decode('gb2312')
-                    stock_detail = StockPrice(stock_id=one.stock_id, \
-		    	                         detail=stock_detail_str, \
-		    	                         price=stock_detail_str.split(',')[3])
-                    stock_detail.put()
-                    one.price_update_date = today
-                    one.put()
-                    cacheMgr.triggerUpdateStock(stocks, one, stock_detail)
-        
+                    sArr.append(one)
+                    if len(sArr)>=40:
+                        break
+            if len(sArr) > 0:
+                resultMap=myutils.getStockPrices(sArr)
+                priceArr = []
+                
+                for t in sArr:
+                    result = resultMap[t.stock_id]
+                    stockPrice = StockPrice(stock_id=t.stock_id,\
+                               detail=result[1], \
+                                price=result[0])
+                    priceArr.append(stockPrice)
+                    t.price_update_date = today
+                db.put(priceArr)
+                db.put(sArr)       
+                cacheMgr.triggerUpdateStocks(stocks)
         self.redirect("/")
 
 

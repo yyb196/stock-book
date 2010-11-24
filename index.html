@@ -5,38 +5,61 @@
 	<link href="/stylesheets/main.css" rel="stylesheet" type="text/css"/>
 	<link href="/stylesheets/jquery.jnotify.min.css" rel="stylesheet" type="text/css"/>		
   </head>
-  <body style="background-color: coral">
-        <table border="0" width="100%"><tr><td><span><h1>Welcome {{ username }}!</h1></span></td><td><div style="float:right"><h3><a href="{{url}}">{{url_linktext}}</a></h3></div></td></tr></table>
+<body style="background-color: coral">
+<table border="0" width="100%">
+	<tr><td>
+	<span><h1>Welcome {{ username }}!</h1></span>
+	</td>
+	<td>
+		{% if isAdmin %}
+			{% if normalPage %}
+				<a href="#" onclick="javascript:window.location='/fav/'">View my favorite</a>
+			{% else %}
+				<a href="#" onclick="javascript:window.location='/?page=0'">View all</a>
+			{% endif %}
+		{%endif%}
+	</td>
+	<td>
+		<div style="float:right"><h3><a href="{{url}}">{{url_linktext}}</a></h3></div>
+	</td>
+	</tr>
+</table>
         
+<!--admin operations(add,search, update)-->
         {% if isAdmin %}
 <table border="0" width="100%"><tr><td width="50%">
-        <div style="float:left">
+        <div style="float:left"><!--add stock-->
         <form id='newStockForm' action='/admin/addNewStock' method='POST'>
            add stock: 
             <input id='stock_value' type='text' name='stock_value' /> 
             <input id='addStock' type='button' onclick="addStockCheck()" value='submit'/>
         </form>
-       </div></td>
-      <td width="30">
-      <form action="/" method="post">
-	<input type="text" name="q" />
-	<input type="submit" value="Search"/>
-	</form>
-      </td><td width="20%">
-       <div style="float:right">
-		<form action='/admin/updateStockPrice' method='get'>
-            <p><input type='submit' value='updateStockPrice'/></p>
-        </form>
-        </div></td></tr></table>
+       </div>
+    </td>
+      <td width="30"><!-- search-->
+      	<form action="{{prefix}}" method="post">
+	  	  <input type="text" name="q" />
+	  	  <input type="submit" value="Search"/>
+	  	</form>
+      </td>
+      <td width="20%">
+       		<div style="float:right"><!--update stock price manully-->
+	   		 <form action='/admin/updateStockPrice' method='get'>
+       		     <p><input type='submit' value='updateStockPrice'/></p>
+       		 </form>
+       		 </div>
+       </td></tr>
+</table>
         {% endif %}
-
+<!--pagenation zone start-->
         <p><div>
 			{% if hasPre %}
 			    <div style="float:right"><a href="{{preHref}}">Pre Page</a></div>
 			{% endif %}
 			{% if hasPre or hasNext %}
 			<div style="float:right">
-				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GoTo:<select onchange="changePage(this)">
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GoTo:
+				<select onchange="changePage(this)">
 					{% for p in pageNoList %}
 					    <option value="{{p.0}}" {% if p.2 %}selected{% endif %}>{{p.1}}</option>
 					{% endfor %}
@@ -48,6 +71,8 @@
 			{% endif %}
 		</div></p>
 		<p> <br/></p>
+<!--pagenation zone end-->
+<!--content table start-->
         <table width="100%" border="1" id="mainTable" >
             <tr>
                 <th style="width:80">name</th>
@@ -61,32 +86,78 @@
                 {% endif %}
             </tr>
         {% for stock in stocks %}
-            <tr>
-            <td style="width:80">
-				{% if stock.high_light %}
-				==>
+            <tr 
+            {% if stock.high_light %}
+			style="background-color: white;"
+			{% endif %} >
+            <td style="width:100" rowspan="{{perPriceLines}}"><!--stock name-->
+	            {% if isAdmin %}<!--is marked or not-->
+	    			{%if stock.isFav%}
+	            		<img style="cursor:pointer" src="/img/mark.png" onclick="changeMark(this, '{{stock.stock_id}}')"/>
+					{%else%}
+	            		<img style="cursor:pointer" src="/img/unmark.png" onclick="changeMark(this, '{{stock.stock_id}}')"/>
+					{%endif%}
+	            {% endif %}				
+				<a href="{{stock.href}}" target="_blank" title="{{ stock.stock_id }}">
+				{{ stock.stock_name }} 
+				</a>
+			</td>
+            {% for pa in stock.stock_price_list %}<!--every price-->
+            	{% if forloop.first%}
+					{% for p in pa %}
+	            		<td  style="width:40;word-break:break-all; word-wrap:break-all;" >
+							<div style="color:{{p.color}}" class="tooltips">{{ p.price }}
+								<span class="tipcontent">{{p.date}}{{p.other}}</span>
+							</div>
+						</td>
+					{% endfor %}
+					<td rowspan="{{perPriceLines}}"><!--last comment-->
+						<div id="last_comment_td_{{ stock.stock_id }}">
+							<div style="word-break:break-all; word-wrap:break-all;"  title="{{stock.last_comment.1}}">
+								{{stock.last_comment.0}}
+							</div>
+							{% if isAdmin and stock.last_comment.0 %}
+							<div>
+								<input type="button" value="Next" onclick="nextComment('{{stock.last_comment.2}}', '{{stock.last_comment.1}}')" />
+							</div>
+							{% endif %}
+						</div>
+					</td>
+		            {% if isAdmin %}
+		            <td  style="width:40" rowspan="{{perPriceLines}}"><!--delete button-->
+						<input type="button" value="delete" onclick="deleteStock(this, '{{stock.stock_id}}')" />
+					</td>
+		            <td  style="width:80" rowspan="{{perPriceLines}}"><!--add comment-->
+						<textarea name="comment" id="comment{{stock.stock_id}}"></textarea>
+						<input type="button" value="addNewComment" onclick="addNewComment('{{stock.stock_id}}')">
+					</td>
+		            {% endif %}
+		            </tr>
+				{% else %}
+					<tr {% if stock.high_light %}style="background-color: white;"{% endif %} >
+						{% for p in pa %}
+	            			<td  style="width:40;word-break:break-all; word-wrap:break-all;" >
+								<div style="color:{{p.color}}" class="tooltips">{{ p.price }}
+									<span class="tipcontent">{{p.date}}{{p.other}}</span>
+								</div>
+							</td>
+						{% endfor %}
+					</tr>
 				{% endif %}
-	<a href="{{stock.href}}" target="_blank" title="{{ stock.stock_id }}">
-	{{ stock.stock_name }} 
-	</a></td>
-            {% for p in stock.stock_price_list %}
-            <td  style="width:40;word-break:break-all; word-wrap:break-all;" ><div title="{{p.date}}" style="color:{{p.color}}">{{ p.price }}</div> </td>
             {% endfor %}
-            <td><div id="last_comment_td_{{ stock.stock_id }}"><div style="word-break:break-all; word-wrap:break-all;"  title="{{stock.last_comment.1}}">{{stock.last_comment.0}}</div>{% if isAdmin and stock.last_comment.0 %}<div><input type="button" value="Next" onclick="nextComment('{{stock.last_comment.2}}', '{{stock.last_comment.1}}')" /></div>{% endif %}</div></td>
-            {% if isAdmin %}
-            <td  style="width:40"><input type="button" value="delete"          onclick="deleteStock(this, '{{stock.stock_id}}')" /></td>
-            <td  style="width:80"><input name="comment" id="comment{{stock.stock_id}}"/><input type="button" value="addNewComment" onclick="addNewComment('{{stock.stock_id}}')"></td>
-             {% endif %}
-            <tr>
+            
         {% endfor %}
-        <table>
+        </table>
+<!--content table end-->
+<!--pagenation zone start-->
 	<p><div>
 		{% if hasPre %}
 		    <div style="float:right"><a href="{{preHref}}">Pre Page</a></div>
 		{% endif %}
 		{% if hasPre or hasNext %}
 		<div style="float:right">
-			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GoTo:<select onchange="changePage(this)">
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GoTo:
+			<select onchange="changePage(this)">
 				{% for p in pageNoList %}
 				    <option value="{{p.0}}" {% if p.2 %}selected{% endif %}>{{p.1}}</option>
 				{% endfor %}
@@ -98,7 +169,12 @@
 		{% endif %}
 	</div></p>
 	<p></p>
+	<p></p>
+	<p></p>
+	<p></p>
 	<br/>
+<!--pagenation zone end-->
+<!--deprecated zone start-->
 	{% if False %}
 	<br/>
 	<br/>
@@ -110,13 +186,14 @@
 			<input type="button" value="Add" onclick="addAdminUser()" /></p>
 	</fieldset>
 	{% endif %}
-	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<!--deprecated zone end-->
+
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js">
+	</script>
 	<script type="text/javascript" src="/jscripts/main.js"></script>
 	<script type="text/javascript" src="/jscripts/jquery.jnotify.min.js"></script>
-	<script type="text/javascript"> 
-	      $(function() {
-	        //$("#mainTable tr:nth-child(even)").addClass("striped");
-	      });
-	</script> 
+	<script type="text/javascript" >
+		var prefix='{{prefix}}'
+	</script>
   </body>
 </html>

@@ -10,6 +10,12 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
+- kind: FavModel
+  properties:
+  - name: name
+  - name: datetime
+    direction: desc
+
 - kind: StockComment
   properties:
   - name: stock_id

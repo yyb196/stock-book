@@ -12,7 +12,7 @@ function deleteStock(obj, sid){
 }
 
 function addNewComment(sid){
-	var c = $('input#comment'+ sid).val()
+	var c = $('#comment'+ sid).val()
 	$.post('/admin/addStockComment', {
 	    stock_id: sid,
 	    comment: c
@@ -58,6 +58,7 @@ function addAdminUser(){
 
 function addStockCheck(){
 	var value=$('#stock_value').val()
+	value = $.trim(value)
 	if(/^\d+$/.test(value))
 	{
 		document.getElementById("newStockForm").submit()
@@ -67,7 +68,7 @@ function addStockCheck(){
 }
 
 function changePage(obj){
-	window.location.href="/?page=" + obj.options[obj.selectedIndex].value
+	window.location.href=prefix + "?page=" + obj.options[obj.selectedIndex].value
 }
 
 function nextComment(sid, datetime){
@@ -76,3 +77,38 @@ function nextComment(sid, datetime){
 		$('#last_comment_td_'+sid).append($(data))
 	});
 }
+
+function changeMark(imgObj, sid){
+	var src = imgObj.src;
+	var href = "/admin/fav/delete/"+sid
+	var isAdd = false
+	if(src.indexOf("unmark.png") != -1)
+	{
+		href = "/admin/fav/add/"+sid
+		isAdd = true
+	}
+	$.post(href, {}, function(data){
+		if(data=="ok"){
+			if(isAdd){
+				imgObj.src="/img/mark.png";
+			}
+			else{
+				imgObj.src="/img/unmark.png";
+			}
+		}
+	})
+}
+
+$(function() {
+    //$("#mainTable tr:nth-child(even)").addClass("striped");
+	$(".tooltips").hover(
+		function() { $(this).contents("span:last-child").css({ display: "block" }); },
+		function() { $(this).contents("span:last-child").css({ display: "none" }); }
+	);
+
+	$(".tooltips").mousemove(function(e) {
+		var mousex = e.pageX + 10;
+		var mousey = e.pageY + 5;
+		$(this).contents("span:last-child").css({  top: mousey, left: mousex });
+	});
+});

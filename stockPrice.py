@@ -25,7 +25,7 @@ def getPriceList(stock_id):
         return priceList
     query = StockPrice.gql("WHERE stock_id=:1 order by date desc",
 		                                stock_id)
-    query = query.fetch(limit=myutils.PER_PRICE_COUNT)
+    query = query.fetch(limit=myutils.PER_PRICE_COUNT*myutils.PRICE_LINES)
     logging.debug("get price for %s , count is: %s" % (stock_id, str(len(query))))
     cacheMgr.cacheStockPrice(stock_id, query)
     return query

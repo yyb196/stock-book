@@ -11,3 +11,21 @@ cron:
 - description: monday morning mailout
   url: /admin/updateStockPrice
   schedule: every monday,tuesday,wednesday,thursday,friday of month 9:30
+- description: monday morning mailout
+  url: /admin/updateStockPrice
+  schedule: every monday,tuesday,wednesday,thursday,friday of month 10:00
+- description: monday morning mailout
+  url: /admin/updateStockPrice
+  schedule: every monday,tuesday,wednesday,thursday,friday of month 10:30
+- description: monday morning mailout
+  url: /admin/updateStockPrice
+  schedule: every monday,tuesday,wednesday,thursday,friday of month 11:00
+- description: monday morning mailout
+  url: /admin/updateStockPrice
+  schedule: every monday,tuesday,wednesday,thursday,friday of month 11:30
+- description: monday morning mailout
+  url: /admin/updateStockPrice
+  schedule: every monday,tuesday,wednesday,thursday,friday of month 12:00
+- description: monday morning mailout
+  url: /admin/updateStockPrice
+  schedule: every monday,tuesday,wednesday,thursday,friday of month 12:30

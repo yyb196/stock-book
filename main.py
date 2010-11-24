@@ -9,17 +9,21 @@ from addNewStock import AddNewStock#
 from deleteStock import DeleteStock#
 from addStockComment import AddStockComment#
 from nextComment import NextComment
+from favorateStock import FavStockAction
+from mainPageFav import MainPageFav
 import security#
 
 #start application
 application = webapp.WSGIApplication(
-    [('/*$', MainPage), \
-     ('/admin/addNewStock', AddNewStock), \
-     ('/admin/addStockComment', AddStockComment), \
-     ('/admin/updateStockPrice', UpdateStock), \
-     ('/admin/user/(add|delete)', security.AuthenUsersAction), \
+    [('/*$', MainPage), 
+     ('/fav/*$', MainPageFav),
+     ('/admin/addNewStock', AddNewStock), 
+     ('/admin/addStockComment', AddStockComment), 
+     ('/admin/updateStockPrice', UpdateStock), 
+     ('/admin/user/(add|delete)', security.AuthenUsersAction), 
      ('/admin/deleteStock', DeleteStock),
-     ('/admin/nextpage/(\d+)/(.*)$', NextComment)],
+     ('/admin/nextpage/(\d+)/(.*)$', NextComment),
+     ('/admin/fav/(add|delete)/(\d+)$', FavStockAction)],
       debug=True)
 
 def main():

@@ -10,16 +10,18 @@ import myutils
 import stock
 from google.appengine.api import memcache
 
-def cachePageContent(page, isAdmin, content):
-	memcache.set("content" + str(page) + str(isAdmin), content, 120)
+def cachePageContent(page, isAdmin, prefix, content):
+	memcache.set("content" + str(page) + str(isAdmin) + prefix, content, 120)
 
 def delPageContent():
 	pageNum = (stock.getStockCount()+myutils.PER_PAGE_COUNT-1)/myutils.PER_PAGE_COUNT
 	for i in range(0, pageNum):
-		memcache.delete("content" + str(i) +"True")
-		memcache.delete("content" + str(i) +"False")
+		for s in ['True', 'False']:
+			for p in ['/', '/fav/']:
+				memcache.delete("content" + str(i) +s+p)
+				
 
-def getPageContent(page, isAdmin):
+def getPageContent(page, isAdmin, prefix):
 	return memcache.get("content" + str(page) + str(isAdmin))
 
 def cacheUsers(userList):
@@ -44,20 +46,26 @@ def cacheLastComment(sid, comment):
 	memcache.set("last_comment" + sid, comment, myutils.CACHE_TIME_SECOND)
 
 def getLastComment(sid):
-	memcache.get("last_comment" + sid)
+	return memcache.get("last_comment" + sid)
 
 def cacheStockPrice(sid, priceList):
 	memcache.set("price"+sid, priceList, myutils.CACHE_TIME_SECOND)
 
 def getStockPrice(sid):
-	memcache.get("price"+sid)
+	return memcache.get("price"+sid)
+
+def cacheFavStocks(name, result):
+	memcache.set(name + "favStocks", result, myutils.CACHE_TIME_SECOND)
+
+def getFavStocks(name):
+	return memcache.get(name + "favStocks")
 
 def triggerAddStock(stock):
 	memcache.delete('stocks')
 	delPageContent()
 
 def triggerAddComment(sid, stockComment):
-	memcache.set("last_comment" + sid, stockComment.comment, myutils.CACHE_TIME_SECOND)
+	memcache.set("last_comment" + sid, stockComment, myutils.CACHE_TIME_SECOND)
 	delPageContent()
 
 def triggerDelStock(stock):
@@ -72,6 +80,12 @@ def triggerUpdateStock(stocks, stock, price):
 def triggerUserChange():
 	memcache.delete("authenUsers")
 
+
+def triggerUpdateStocks(stocks):
+	memcache.delete('stocks')
+	for s in stocks:
+		memcache.delete("price"+s.stock_id)	
+	delPageContent()	
 
 
 

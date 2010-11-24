@@ -33,3 +33,14 @@ legend {
   color: white;
   padding: 2px 16px;
 }
+span.tipcontent {
+  display:none;
+  position:absolute;
+  z-index:1000;
+  -moz-border-radius:4px;
+  -webkit-border-radius:4px;
+  background:#e8e8e8;
+  color:black;
+  padding:15px;
+}
+

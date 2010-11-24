@@ -31,7 +31,7 @@ class AddNewStock(webapp.RequestHandler):
 		logging.info("add stock with id %s and has same is %s" \
 		           % (stockValue, str(hasSame)))
 		if hasSame:
-			self.redirect('/')
+			self.redirect('/?q='+stockValue)
 			return
         stock = Stock(stock_id=stockValue, \
                     creater=users.get_current_user().email())
@@ -48,5 +48,6 @@ class AddNewStock(webapp.RequestHandler):
         
         #update stocks cache
         cacheMgr.triggerAddStock(stock)
-        self.redirect('/')
+        page = (len(stockUtils.getStocks())+myutils.PER_PAGE_COUNT-1)/myutils.PER_PAGE_COUNT-1
+        self.redirect('/?page='+str(page))
 
